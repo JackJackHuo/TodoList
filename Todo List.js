@@ -1,8 +1,11 @@
-let container = document.querySelector('.container')
-let input = document.querySelector('#input')
-let btn = document.querySelector('#btn')
-let tbody = document.querySelector('tbody')
-
+// 初始變數
+const lists = document.querySelector("#lists");
+const todoList = document.querySelector("#my-todo");
+const doneList = document.querySelector("#my-done-todo");
+const addBtn = document.querySelector("#add-btn");
+const input = document.querySelector("#new-todo");
+const warning = document.querySelector("#warning");
+const warningSign = document.querySelector(".fa-exclamation-circle");
 
 // 資料
 let todos = [
@@ -11,95 +14,67 @@ let todos = [
     "Buy eggs",
     "Organize office",
     "Pay bills"
-  ];
-  //迭代陣列資料
-  for(item of todos){
-      addItem(item)
-  }
-  //新增插入資料功能
-  function addItem(text){
-    let row = document.createElement('tr')
-    let replace = `
-    <td class="label">${text}</td>
-    <td><i class="far fa-trash-alt"></i></td>
-   `
-    row.innerHTML = replace
-    tbody.appendChild(row)
+];
 
-  }
-//新增事件
-btn.addEventListener('click' , add)
-function add(event){
-   let value = event.target.previousElementSibling.value
-   if(value !== ''){
-    addItem(value)
-   }
-   
+for (let todo of todos) {
+    addItem(todo);
 }
-//刪除事件
 
-tbody.addEventListener('click' , del)
-function del(event){
-    let target = event.target
-    if(target.classList.contains('far')){
-        target.parentElement.parentElement.remove()
-    }else if(target.className === 'label'){
-        target.innerHTML = `<del><i id="i">${target.innerText}</i></del>`
-    }else if(target.id === 'i'){
-        this.children[0].children[0].innerHTML = target.innerText
+// 函式
+function addItem(text) {
+    let newItem = document.createElement("li");
+    newItem.className = "newItem"
+    newItem.innerHTML = `
+    <label for="todo">${text}</label>
+    <i class="far fa-trash-alt"></i>
+  `;
+    todoList.appendChild(newItem);
+}
+// Create
+//Enter鍵監聽
+input.addEventListener("keypress", enter);
+function enter(e) {
+    console.log(e);
+    if (event.which === 13) {
+        create();
     }
 }
+//按鈕監聽
+addBtn.addEventListener("click", create);
 
-// =========嘗試失敗==================================
-//利用陣列方式儲存資料，再用迭代將陣列中的資料一次渲染出來
-//刪除時利用比對欲刪除及陣列裡的資料，找到後從陣列中移除
-//缺點是當遇到同樣的名稱的資料內容時會一次全部被刪除
-
-// let listArr = []
-// //新增事件
-// btn.addEventListener('click' , add)
-// function add(event){
-//     console.log(event)
-//     //將新增的內容推進陣列
-//     listArr.push({
-//         content: input.value
-//     })
-//     render(listArr)
-    
-// }
-// //刪除事件
-
-// tbody.addEventListener('click' , del)
-//     function del(event){
-//         let target = event.target
-//         //選取垃圾桶圖案條件
-//         if (target.classList[0] === "far"){
-//             //抓取欲刪除文字內容
-//             let delItem = target.parentElement.previousElementSibling.textContent
-//             //陣列中尋找欲刪除內容
-//             listArr.forEach(item => {
-//                 if(Object.values(item).includes(delItem)){
-//                 //找到後剔除陣列
-//                 listArr.splice(listArr.indexOf(item),1)
-//                 }
-//             })
-//             render(listArr)
-//         //點擊文字內容效果
-//         }else if(target.innerText!==''){
-//             target.innerHTML = `<del><i>${target.innerText}</i></del>`
-//         }    
-//     }
-
-// //渲染畫面
-// function render(listArr){
-//     let replace = ''
-//     for(item of listArr){
-//         replace += `
-//         <tr>
-//         <td>${item.content}</td>
-//         <td><i class="far fa-trash-alt"></i></td>
-//         </tr>
-//         `
-//     }
-//     tbody.innerHTML = replace
-// }
+function create() {
+    const inputValue = input.value;
+    //檢查受否包含字串
+    let check = [];
+    for (let item of inputValue) {
+        check.push(item === " ");
+    }
+    //先消除前次警告元素的class，復歸輸入欄
+    warning.classList.remove("warning");
+    warningSign.classList.remove("warningSign");
+    if (check.includes(false)) {
+        addItem(inputValue);
+        //偵測到輸入內容全為空白鍵
+    } else {
+        //顯示警告
+        warning.classList.toggle("warning");
+        warningSign.classList.toggle("warningSign");
+    }
+}
+// Delete and check
+lists.addEventListener("click", function (event) {
+    const target = event.target;
+    let parentElement = target.parentElement;
+    if (target.classList.contains("fa-trash-alt")) {
+        parentElement.remove();
+        //移至done清單
+    } else if (target.className === "") {
+        console.log(target)
+        target.classList.toggle("checked");
+        doneList.appendChild(parentElement);
+        //移回todo清單
+    } else if (target.classList.contains("checked")) {
+        target.classList.toggle("checked");
+        todoList.appendChild(parentElement);
+    }
+});
